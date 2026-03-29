@@ -29,7 +29,9 @@ python app.py
 
 
 
-<img width="1039" height="912" alt="image" src="https://github.com/user-attachments/assets/f28ce7ab-1efe-4502-a662-e5dd65260bcd" />
-<img width="1069" height="841" alt="image" src="https://github.com/user-attachments/assets/65f784d1-1316-4eb4-a896-6ff60ccdfecc" />
-<img width="1050" height="842" alt="image" src="https://github.com/user-attachments/assets/85c6b801-c689-47aa-a357-d805ef784e02" />
+![Dashboard](https://github.com/user-attachments/assets/f28ce7ab-1efe-4502-a662-e5dd65260bcd)
+
+![Dashboard](https://github.com/user-attachments/assets/65f784d1-1316-4eb4-a896-6ff60ccdfecc)
+
+![Dashboard](https://github.com/user-attachments/assets/85c6b801-c689-47aa-a357-d805ef784e02)
 
