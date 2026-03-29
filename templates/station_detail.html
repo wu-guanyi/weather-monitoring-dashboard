@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ station_name }} 詳細監測</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .page-title {
+            font-weight: bold;
+        }
+        .info-card {
+            border: none;
+            border-radius: 16px;
+        }
+        .value-big {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .meta {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">氣象監測系統</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/">首頁</a>
+                <a class="nav-link" href="/stations">各地總覽</a>
+                <a class="nav-link active" href="#">{{ station_name }} 詳細頁</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="page-title mb-0">{{ station_name }} 詳細監測</h1>
+            <a href="/stations" class="btn btn-outline-primary">返回各地總覽</a>
+        </div>
+
+        {% if latest %}
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">最新溫度</h5>
+                        <div class="value-big">{{ latest.temperature_celsius }} °C</div>
+                        <div class="meta">更新時間：{{ latest.recorded_at }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">最新濕度</h5>
+                        <div class="value-big">{{ latest.humidity }} %</div>
+                        <div class="meta">資料來源：{{ latest.data_source }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">延遲分鐘數</h5>
+                        <div class="value-big">{{ latest.delay_minutes }} 分</div>
+                        <div class="meta">頁面更新：{{ latest.updated_at }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="card">
+            <div class="card-body">
+                <h5>最近 50 筆溫度變化</h5>
+                <div style="height: 300px;">
+                <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="card-title">最近 50 筆濕度變化</h3>
+                <canvas id="humidityChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="card-title">最近 10 筆資料</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>地區</th>
+                                <th>時間</th>
+                                <th>溫度 (°C)</th>
+                                <th>濕度 (%)</th>
+                                <th>資料來源</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in history %}
+                            <tr>
+                                <td>{{ row.location_name }}</td>
+                                <td>{{ row.recorded_at }}</td>
+                                <td>{{ row.temperature_celsius }}</td>
+                                <td>{{ row.humidity }}</td>
+                                <td>{{ row.data_source }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="card-title">每日統計</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>平均溫度</th>
+                                <th>最高溫度</th>
+                                <th>最低溫度</th>
+                                <th>平均濕度</th>
+                                <th>最高濕度</th>
+                                <th>最低濕度</th>
+                                <th>總筆數</th>
+                                <th>有效溫度</th>
+                                <th>有效濕度</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in daily_stats %}
+                            <tr>
+                                <td>{{ row.stat_date }}</td>
+                                <td>{{ row.avg_temp }}</td>
+                                <td>{{ row.max_temp }}</td>
+                                <td>{{ row.min_temp }}</td>
+                                <td>{{ row.avg_humidity }}</td>
+                                <td>{{ row.max_humidity }}</td>
+                                <td>{{ row.min_humidity }}</td>
+                                <td>{{ row.total_count }}</td>
+                                <td>{{ row.valid_temp_count }}</td>
+                                <td>{{ row.valid_humidity_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const labels = {{ chart_data | map(attribute='recorded_at') | list | tojson }};
+        const tempData = {{ chart_data | map(attribute='temperature_celsius') | list | tojson }};
+        const humidityData = {{ chart_data | map(attribute='humidity') | list | tojson }};
+
+        new Chart(document.getElementById('tempChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '溫度 (°C)',
+                    data: tempData,
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        new Chart(document.getElementById('humidityChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '濕度 (%)',
+                    data: humidityData,
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        document.getElementById('tempChart').style.height = '320px';
+        document.getElementById('humidityChart').style.height = '320px';
+    </script>
+</body>
+</html>

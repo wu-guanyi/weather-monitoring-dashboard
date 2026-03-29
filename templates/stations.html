@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>各地即時天氣總覽</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .page-title {
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+        .station-card {
+            border: none;
+            border-radius: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .station-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        }
+        .station-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #212529;
+        }
+        .station-name:hover {
+            color: #0d6efd;
+        }
+        .temp {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .humidity {
+            font-size: 1.1rem;
+        }
+        .meta {
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+        .delay-good {
+            color: #198754;
+            font-weight: bold;
+        }
+        .delay-warn {
+            color: #fd7e14;
+            font-weight: bold;
+        }
+        .delay-bad {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">氣象監測系統</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/">首頁</a>
+                <a class="nav-link active" href="/stations">各地總覽</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-4">
+        <h1 class="page-title">各地即時天氣總覽</h1>
+
+        <div class="row g-4">
+            {% for row in station_latest %}
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="card station-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <a class="station-name" href="/station/{{ row.location_name }}">{{ row.location_name }}</a>
+                            {% if row.delay_minutes <= 20 %}
+                                <span class="delay-good">{{ row.delay_minutes }} 分鐘</span>
+                            {% elif row.delay_minutes <= 60 %}
+                                <span class="delay-warn">{{ row.delay_minutes }} 分鐘</span>
+                            {% else %}
+                                <span class="delay-bad">{{ row.delay_minutes }} 分鐘</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="temp mb-2">{{ row.temperature_celsius }} °C</div>
+                        <div class="humidity mb-3">濕度：{{ row.humidity }} %</div>
+
+                        <div class="meta">更新時間：{{ row.recorded_at }}</div>
+                        <div class="meta">資料來源：{{ row.data_source }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not station_latest %}
+        <div class="alert alert-warning mt-4">
+            目前沒有可顯示的站點資料。
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
