@@ -1,6 +1,3 @@
----
-
-```md
 # 🌦 Weather Monitoring Dashboard
 
 A Flask-based weather monitoring system that collects real-time temperature and humidity data from multiple regions in Taiwan.
@@ -29,15 +26,3 @@ A Flask-based weather monitoring system that collects real-time temperature and 
 ```bash
 pip install -r requirements.txt
 python app.py
-```md
-## 📷 Demo
-
-### Dashboard Overview
-![Dashboard](https://github.com/user-attachments/assets/dfc24cbc-1161-4074-8525-2c8c74bb49c7)
-
-### Station Detail
-![Station Detail](https://github.com/user-attachments/assets/ef5673b7-a510-4f36-abd7-ad319717b872)
-
-### Charts Visualization
-![Charts](https://github.com/user-attachments/assets/6936b21d-156d-43ab-be11-ec04258de4bd)
-
