@@ -29,7 +29,7 @@ A Flask-based weather monitoring system that collects real-time temperature and 
 ```bash
 pip install -r requirements.txt
 python app.py
-
+```md
 ## 📷 Demo
 
 ### Dashboard Overview
