@@ -22,11 +22,11 @@ A Flask-based weather monitoring system that collects real-time temperature and 
 3. Process data with Pandas (cleaning & filling missing values)
 4. Visualize data in dashboard
 
+
 ## 📦 Installation
 ```bash
 pip install -r requirements.txt
 python app.py
-
 
 ## 📷 Demo
 
