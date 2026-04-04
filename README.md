@@ -1,0 +1,15 @@
+API Endpoints
+1. 取得城市列表
+GET /api/cities
+2. 取得指定城市最新資料
+GET /api/latest?city=台北
+3. 取得指定城市歷史資料
+GET /api/history?city=台北&limit=10
+4. 取得指定城市每日統計
+GET /api/daily-stats?city=台北
+5. 取得指定城市圖表資料
+GET /api/chart?city=台北&limit=50
+6. 取得所有站點最新資料
+GET /api/stations/latest
+7. 取得指定城市摘要資料
+GET /api/summary?city=台北

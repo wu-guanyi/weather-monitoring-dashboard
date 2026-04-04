@@ -2,14 +2,18 @@
 __pycache__/
 *.pyc
 
-# virtual env
+# 虛擬環境
 .venv/
+env/
 
-# secrets
-.env
-
-# IDE
+# VSCode
 .vscode/
 
 # OS
 .DS_Store
+
+# logs
+*.log
+
+# database（如果你有本地 DB）
+*.db

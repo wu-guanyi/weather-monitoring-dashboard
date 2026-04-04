@@ -3,8 +3,7 @@ from datetime import datetime
 import gc
 import requests
 import pandas as pd
-import psycopg2
-
+from db import get_connection
 
 def fetch_weather_data(session, api_url):
     try:
@@ -70,7 +69,7 @@ def clean_and_filter_stations(df_raw, target_stations):
         return pd.DataFrame()
 
 
-def insert_into_postgresql(df, db_config):
+def insert_into_postgresql(df):
     if df is None or df.empty:
         print("沒有可寫入的資料")
         return
@@ -79,13 +78,7 @@ def insert_into_postgresql(df, db_config):
     cur = None
 
     try:
-        conn = psycopg2.connect(
-            host=db_config["host"],
-            dbname=db_config["dbname"],
-            user=db_config["user"],
-            password=db_config["password"],
-            port=db_config["port"]
-        )
+        conn = get_connection()
         cur = conn.cursor()
 
         for _, row in df.iterrows():
@@ -134,15 +127,6 @@ target_stations = {
     "桃園": "C2C480"
 }
 
-DB_CONFIG = {
-    "host": "localhost",
-     "dbname": "postgres",
-     "user": "postgres",
-     "password": "99421088zxccxz",
-     "port": "5432"
-}
-
-
 def main():
     print("=" * 60)
     print("開始抓取時間：", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -157,7 +141,7 @@ def main():
             print(df_selected[["station", "station_id", "datetime", "temp", "humidity"]])
             print("共取得站點數：", df_selected["station"].nunique())
             print("API回傳時間：", df_selected["datetime"].iloc[0])
-            insert_into_postgresql(df_selected, DB_CONFIG)
+            insert_into_postgresql(df_selected)
         else:
             print("本次未取得目標站點資料")
         
