@@ -1,19 +1,4 @@
-<<<<<<< HEAD
-API Endpoints
-1. 取得城市列表
-GET /api/cities
-2. 取得指定城市最新資料
-GET /api/latest?city=台北
-3. 取得指定城市歷史資料
-GET /api/history?city=台北&limit=10
-4. 取得指定城市每日統計
-GET /api/daily-stats?city=台北
-5. 取得指定城市圖表資料
-GET /api/chart?city=台北&limit=50
-6. 取得所有站點最新資料
-GET /api/stations/latest
-7. 取得指定城市摘要資料
-GET /api/summary?city=台北
+
 =======
 # 🌦 Weather Monitoring Dashboard
 
@@ -57,4 +42,4 @@ Station Detail
 
 
 <img width="1170" height="898" alt="image" src="https://github.com/user-attachments/assets/509d24fd-b579-41b5-aed1-69f27c2da242" />
->>>>>>> 17a4bb9b49e975e76c868bd3ba325d88011108b4
+>>>>>>> 
