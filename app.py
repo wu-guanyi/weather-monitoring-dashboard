@@ -75,5 +75,29 @@ def stations_page():
     return render_template("stations.html", station_latest=station_latest)
 
 
+@app.route("/station/<station_name>")
+def station_detail(station_name):
+    try:
+        latest = get_latest_by_city(station_name)
+        history = get_history_by_city(station_name, limit=10)
+        daily_stats = get_daily_stats_by_city(station_name)
+        chart_data = get_chart_data_by_city(station_name, limit=50)
+    except Exception as e:
+        print(f"station_detail 發生錯誤: {e}")
+        latest = None
+        history = []
+        daily_stats = []
+        chart_data = []
+
+    return render_template(
+        "station_detail.html",
+        station_name=station_name,
+        latest=latest,
+        history=history,
+        daily_stats=daily_stats,
+        chart_data=chart_data
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
