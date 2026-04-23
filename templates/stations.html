@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>各地即時天氣總覽</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -25,8 +26,8 @@
         .station-name {
             font-size: 1.3rem;
             font-weight: bold;
-            text-decoration: none;
             color: #212529;
+            text-decoration: none;
         }
         .station-name:hover {
             color: #0d6efd;
@@ -70,34 +71,52 @@
     <div class="container pb-4">
         <h1 class="page-title">各地即時天氣總覽</h1>
 
+        {% if station_latest %}
         <div class="row g-4">
             {% for row in station_latest %}
             <div class="col-12 col-md-6 col-xl-4">
                 <div class="card station-card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <a class="station-name" href="/station/{{ row.location_name }}">{{ row.location_name }}</a>
-                            {% if row.delay_minutes <= 20 %}
-                                <span class="delay-good">{{ row.delay_minutes }} 分鐘</span>
-                            {% elif row.delay_minutes <= 60 %}
-                                <span class="delay-warn">{{ row.delay_minutes }} 分鐘</span>
+                            <span class="station-name">{{ row.location_name }}</span>
+                            {% if row.delay_minutes is not none %}
+                                {% if row.delay_minutes <= 20 %}
+                                    <span class="delay-good">{{ row.delay_minutes }} 分鐘</span>
+                                {% elif row.delay_minutes <= 60 %}
+                                    <span class="delay-warn">{{ row.delay_minutes }} 分鐘</span>
+                                {% else %}
+                                    <span class="delay-bad">{{ row.delay_minutes }} 分鐘</span>
+                                {% endif %}
                             {% else %}
-                                <span class="delay-bad">{{ row.delay_minutes }} 分鐘</span>
+                                <span class="delay-bad">無資料</span>
                             {% endif %}
                         </div>
 
-                        <div class="temp mb-2">{{ row.temperature_celsius }} °C</div>
-                        <div class="humidity mb-3">濕度：{{ row.humidity }} %</div>
+                        <div class="temp mb-2">
+                            {% if row.temperature_celsius is not none %}
+                                {{ row.temperature_celsius }} °C
+                            {% else %}
+                                無資料
+                            {% endif %}
+                        </div>
 
-                        <div class="meta">更新時間：{{ row.recorded_at }}</div>
-                        <div class="meta">資料來源：{{ row.data_source }}</div>
+                        <div class="humidity mb-3">
+                            濕度：
+                            {% if row.humidity is not none %}
+                                {{ row.humidity }} %
+                            {% else %}
+                                無資料
+                            {% endif %}
+                        </div>
+
+                        <div class="meta">更新時間：{{ row.recorded_at or '無資料' }}</div>
+                        <div class="meta">資料來源：{{ row.data_source or '無資料' }}</div>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-
-        {% if not station_latest %}
+        {% else %}
         <div class="alert alert-warning mt-4">
             目前沒有可顯示的站點資料。
         </div>

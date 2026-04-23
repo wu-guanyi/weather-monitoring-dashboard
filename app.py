@@ -5,7 +5,8 @@ from services.weather_service import (
     get_latest_by_city,
     get_history_by_city,
     get_daily_stats_by_city,
-    get_chart_data_by_city
+    get_chart_data_by_city,
+    get_station_latest_list
 )
 from routes.weather_api import weather_api
 
@@ -61,6 +62,17 @@ def index():
         daily_chart_labels=daily_chart_labels,
         daily_avg_temps=daily_avg_temps
     )
+
+
+@app.route("/stations")
+def stations_page():
+    try:
+        station_latest = get_station_latest_list()
+    except Exception as e:
+        print(f"stations_page 發生錯誤: {e}")
+        station_latest = []
+
+    return render_template("stations.html", station_latest=station_latest)
 
 
 if __name__ == "__main__":
