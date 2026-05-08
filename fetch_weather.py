@@ -72,10 +72,11 @@ def clean_and_filter_stations(df_raw, target_stations):
 def insert_into_postgresql(df):
     if df is None or df.empty:
         print("沒有可寫入的資料")
-        return
+        return 0
 
     conn = None
     cur = None
+    inserted_count = 0
 
     try:
         conn = get_connection()
@@ -97,13 +98,79 @@ def insert_into_postgresql(df):
                 "cwa_station_api"
             ))
 
+            inserted_count += cur.rowcount
+
         conn.commit()
-        print("寫入完成")
+        print(f"寫入完成，本次實際新增 {inserted_count} 筆")
+        return inserted_count
 
     except Exception as e:
         if conn:
             conn.rollback()
         print("insert_into_postgresql 發生錯誤：", e)
+        raise e
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+def insert_fetch_log(fetch_started_at, fetch_finished_at, status, records_fetched, records_inserted, error_message=None):
+    conn = None
+    cur = None
+
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO api_fetch_logs
+            (fetch_started_at, fetch_finished_at, status, records_fetched, records_inserted, error_message)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            fetch_started_at,
+            fetch_finished_at,
+            status,
+            records_fetched,
+            records_inserted,
+            error_message
+        ))
+
+        conn.commit()
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print("insert_fetch_log 發生錯誤：", e)
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+def get_active_stations():
+    conn = None
+    cur = None
+
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT location_name, station_id
+            FROM stations
+            WHERE is_active = TRUE
+        """)
+
+        rows = cur.fetchall()
+
+        return {location_name: station_id for location_name, station_id in rows}
+
+    except Exception as e:
+        print("get_active_stations 發生錯誤：", e)
+        return {}
 
     finally:
         if cur:
@@ -112,27 +179,35 @@ def insert_into_postgresql(df):
             conn.close()
 
 
+
 API_URL = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=rdec-key-123-45678-011121314"
 #"https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=rdec-key-123-45678-011121314"
-target_stations = {
-    "基隆": "466940",
-    "台中": "467490",
-    "台南": "467410",
-    "高雄": "467441",
-    "宜蘭": "467080",
-    "花蓮": "466990",
-    "台東": "467660",
-    "台北": "466920",
-    "屏東": "C2R170",
-    "桃園": "C2C480"
-}
+# target_stations = {
+#     "基隆": "466940",
+#     "台中": "467490",
+#     "台南": "467410",
+#     "高雄": "467441",
+#     "宜蘭": "467080",
+#     "花蓮": "466990",
+#     "台東": "467660",
+#     "台北": "466920",
+#     "屏東": "C2R170",
+#     "桃園": "C2C480"
+# }
 
 def main():
+    fetch_started_at = datetime.now()
+    fetch_finished_at = None
+    status = "success"
+    records_fetched = 0
+    records_inserted = 0
+    error_message = None
+
     print("=" * 60)
-    print("開始抓取時間：", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    print("開始抓取時間：", fetch_started_at.strftime("%Y-%m-%d %H:%M:%S"))
 
     session = requests.Session()
-
+    target_stations = get_active_stations()
     try:
         df_raw = fetch_weather_data(session, API_URL)
         df_selected = clean_and_filter_stations(df_raw, target_stations)
@@ -141,17 +216,35 @@ def main():
             print(df_selected[["station", "station_id", "datetime", "temp", "humidity"]])
             print("共取得站點數：", df_selected["station"].nunique())
             print("API回傳時間：", df_selected["datetime"].iloc[0])
-            insert_into_postgresql(df_selected)
+
+            records_fetched = len(df_selected)
+            records_inserted = insert_into_postgresql(df_selected)
+
         else:
             print("本次未取得目標站點資料")
-        
+            status = "no_data"
+            records_fetched = 0
+            records_inserted = 0
+
     except Exception as e:
+        status = "failed"
+        error_message = str(e)
         print("發生錯誤：", e)
 
     finally:
+        fetch_finished_at = datetime.now()
+
+        insert_fetch_log(
+            fetch_started_at=fetch_started_at,
+            fetch_finished_at=fetch_finished_at,
+            status=status,
+            records_fetched=records_fetched,
+            records_inserted=records_inserted,
+            error_message=error_message
+        )
+
         session.close()
         gc.collect()
-
 
 if __name__ == "__main__":
     print("氣象資料抓取程式啟動中...")
